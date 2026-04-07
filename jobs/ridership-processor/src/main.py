@@ -133,6 +133,7 @@ def process_data(raw_csv: Path) -> Path:
                 "Mode"                 AS "lineId",
                 CAST("Count" AS BIGINT) AS ridership
             FROM raw
+            WHERE "Count" IS NOT NULL
             ORDER BY date, "lineId"
         ) TO '{parquet_out}' (FORMAT PARQUET)
     """)
