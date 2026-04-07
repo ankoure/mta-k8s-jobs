@@ -1,0 +1,64 @@
+name: Build and Push Job Image
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "jobs/**"
+
+jobs:
+  detect-changed-job:
+    runs-on: ubuntu-latest
+    outputs:
+      job_name: ${{ steps.detect.outputs.job_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect changed job directory
+        id: detect
+        run: |
+          # Find the first jobs/<job-name>/ directory that changed in this push.
+          CHANGED=$(git diff --name-only HEAD^ HEAD | grep '^jobs/' | awk -F'/' '{print $2}' | sort -u | head -1)
+          if [[ -z "${CHANGED}" ]]; then
+            echo "No job directory changed — nothing to build."
+            echo "job_name=" >> "$GITHUB_OUTPUT"
+          else
+            echo "Detected changed job: ${CHANGED}"
+            echo "job_name=${CHANGED}" >> "$GITHUB_OUTPUT"
+          fi
+
+  build-and-push:
+    runs-on: ubuntu-latest
+    needs: detect-changed-job
+    if: needs.detect-changed-job.outputs.job_name != ''
+    permissions:
+      contents: read
+      packages: write
+    env:
+      REGISTRY: ghcr.io/${{ github.repository_owner }}
+      JOB_NAME: ${{ needs.detect-changed-job.outputs.job_name }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: jobs/${{ env.JOB_NAME }}
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.JOB_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ env.JOB_NAME }}:${{ github.sha }}
+
+  # Deployment is handled by Argo CD. Once this workflow pushes a new image,
+  # update the image tag in the job's cronjob.yaml and push to main — Argo CD
+  # will automatically sync the change to the cluster.

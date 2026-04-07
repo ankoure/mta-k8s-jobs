@@ -1,0 +1,15 @@
+# Secrets — never commit real credentials
+*secrets.yaml
+*.env
+
+# Python artifacts
+__pycache__/
+*.pyc
+.venv/
+dist/
+*.egg-info/
+
+# Editor files
+.DS_Store
+.idea/
+.vscode/

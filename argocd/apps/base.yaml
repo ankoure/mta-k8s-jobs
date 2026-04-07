@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mta-k8s-jobs-base
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/ankoure/mta-k8s-jobs.git
+    targetRevision: main
+    path: base
+    directory:
+      include: "namespace.yaml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: data-jobs
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
