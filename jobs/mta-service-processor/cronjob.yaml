@@ -13,8 +13,6 @@ spec:
       template:
         spec:
           restartPolicy: OnFailure
-          imagePullSecrets:
-            - name: ghcr-pull-secret
           containers:
             - name: mta-service-processor
               image: ghcr.io/ankoure/mta-service-processor:latest
