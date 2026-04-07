@@ -1,10 +1,10 @@
 """
 ridership-processor/src/main.py
 
-Fetches MTA daily ridership CSV data, converts it to Parquet with DuckDB,
-and writes rows to a DynamoDB table.
+Fetches MTA daily ridership CSV data, aggregates it into weekly buckets
+(Monday-Sunday) with DuckDB, and writes rows to a DynamoDB table.
 
-Runs every hour as a Kubernetes CronJob.
+Runs daily as a Kubernetes CronJob.
 """
 
 import logging
@@ -57,6 +57,7 @@ LINE_ID_MAP: dict[str, str] = {
     "MNR":         "line-mnr",
     "LIRR":        "line-lirr",
     "Bus":         "line-bus",
+    "AAR":         "line-aar",
     "BT":          "line-bridgesandtunnels",
     "CRZ Entries": "line-crzentries",
     "CBD Entries":  "line-cbdentries",
@@ -107,13 +108,14 @@ def fetch_data() -> Path:
 
 def process_data(raw_csv: Path) -> Path:
     """
-    Use DuckDB to convert the daily ridership CSV to a Parquet file.
+    Use DuckDB to convert the daily ridership CSV to a Parquet file,
+    aggregated into weekly buckets (Monday to Sunday).
 
     The source CSV has columns: date, mode, count.
-    The output Parquet normalises these to: date (DATE), lineId (VARCHAR),
-    ridership (BIGINT) — matching the DynamoDB table schema.
+    The output Parquet has: week_start (DATE, always a Monday),
+    lineId (VARCHAR), ridership (BIGINT, summed over the week).
     """
-    parquet_out = TMP_DIR / "daily_ridership.parquet"
+    parquet_out = TMP_DIR / "weekly_ridership.parquet"
 
     log.info("Processing data with DuckDB")
     con = duckdb.connect()
@@ -129,11 +131,12 @@ def process_data(raw_csv: Path) -> Path:
     con.execute(f"""
         COPY (
             SELECT
-                CAST("Date" AS DATE)   AS date,
-                "Mode"                 AS "lineId",
-                CAST("Count" AS BIGINT) AS ridership
+                DATE_TRUNC('week', CAST("Date" AS DATE)) AS date,
+                "Mode"                                   AS "lineId",
+                SUM(CAST("Count" AS BIGINT))             AS ridership
             FROM raw
             WHERE "Count" IS NOT NULL
+            GROUP BY DATE_TRUNC('week', CAST("Date" AS DATE)), "Mode"
             ORDER BY date, "lineId"
         ) TO '{parquet_out}' (FORMAT PARQUET)
     """)
@@ -149,12 +152,12 @@ def process_data(raw_csv: Path) -> Path:
 
 
 def write_to_dynamodb(parquet_file: Path) -> None:
-    """Write daily ridership rows to the Ridership DynamoDB table.
+    """Write weekly ridership rows to the Ridership DynamoDB table.
 
     Each row becomes an item with:
       lineId    (S) — partition key, the MTA mode (e.g. Subway, Bus, LIRR)
-      date      (S) — sort key, ISO date string (YYYY-MM-DD)
-      ridership (N) — estimated daily ridership / traffic count
+      date      (S) — sort key, ISO date of the week's Monday (YYYY-MM-DD)
+      count (N) — total ridership / traffic count for that week
     """
     con = duckdb.connect()
     rows = con.execute(f"""
@@ -173,7 +176,7 @@ def write_to_dynamodb(parquet_file: Path) -> None:
             batch.put_item(Item={
                 "lineId": normalize_line_id(str(raw_mode)),
                 "date": str(date),
-                "ridership": Decimal(str(ridership)),
+                "count": Decimal(str(ridership)),
             })
 
     log.info("DynamoDB write complete")

@@ -1,7 +1,8 @@
 # ridership-processor
 
 Fetches the [MTA Daily Ridership and Traffic](https://data.ny.gov/Transportation/MTA-Daily-Ridership-and-Traffic-Beginning-2020/sayj-mze2/about_data)
-CSV, converts it to Parquet with DuckDB, and writes rows to a DynamoDB table.
+CSV, aggregates it into weekly buckets (Monday–Sunday) with DuckDB, and writes
+rows to a DynamoDB table.
 
 Runs daily at 6:00 AM UTC (`0 6 * * *`) as a Kubernetes CronJob.
 
@@ -10,9 +11,9 @@ Runs daily at 6:00 AM UTC (`0 6 * * *`) as a Kubernetes CronJob.
 ## What it does
 
 1. Downloads the MTA Daily Ridership CSV from the NY.gov data API.
-2. Uses DuckDB to convert the CSV to Parquet with normalised columns (`date`, `lineId`, `ridership`).
+2. Uses DuckDB to aggregate daily counts into weekly buckets (`DATE_TRUNC('week', date)` — each date is the Monday of that week).
 3. Normalises mode names to line IDs (e.g., "Subway" → `line-subway`).
-4. Writes each row to the **Ridership** DynamoDB table (partition key: `lineId`, sort key: `date`).
+4. Writes each weekly total to the **Ridership** DynamoDB table (partition key: `lineId`, sort key: `date` as the week's Monday).
 5. Removes local temporary files.
 
 ---
