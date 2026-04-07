@@ -6,6 +6,12 @@ on:
       - main
     paths:
       - "jobs/**"
+  workflow_dispatch:
+    inputs:
+      job_name:
+        description: "Job to build (directory name under jobs/)"
+        required: true
+        type: string
 
 jobs:
   detect-changed-job:
@@ -20,6 +26,13 @@ jobs:
       - name: Detect changed job directory
         id: detect
         run: |
+          # Use the manually provided job name if triggered via workflow_dispatch.
+          if [[ -n "${{ inputs.job_name }}" ]]; then
+            echo "Manual trigger for job: ${{ inputs.job_name }}"
+            echo "job_name=${{ inputs.job_name }}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
           # Find the first jobs/<job-name>/ directory that changed in this push.
           CHANGED=$(git diff --name-only HEAD^ HEAD | grep '^jobs/' | awk -F'/' '{print $2}' | sort -u | head -1)
           if [[ -z "${CHANGED}" ]]; then
