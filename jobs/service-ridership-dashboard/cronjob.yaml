@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: service-ridership-dashboard
+  namespace: data-jobs
+spec:
+  schedule: "30 7 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: service-ridership-dashboard
+              image: ghcr.io/ankoure/service-ridership-dashboard:latest
+              resources:
+                requests:
+                  memory: "512Mi"
+                  cpu: "250m"
+                limits:
+                  memory: "4Gi"
+                  cpu: "1"
+              envFrom:
+                - secretRef:
+                    name: aws-credentials
+              env:
+                - name: S3_BUCKET_NAME
+                  value: "mta-service-ridership-dashboard"
