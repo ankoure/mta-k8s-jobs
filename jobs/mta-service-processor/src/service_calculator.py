@@ -57,8 +57,12 @@ def get_service_ids_for_date(feed_data: GtfsFeedData, today: date) -> Dict[str, 
             service.sunday,
         ][today.weekday()] == 1
         exceptions_today = [ex for ex in service_exceptions if ex.date == today]
-        is_removed = any(ex.exception_type == EXCEPTION_TYPE_REMOVED for ex in exceptions_today)
-        is_added = any(ex.exception_type == EXCEPTION_TYPE_ADDED for ex in exceptions_today)
+        is_removed = any(
+            ex.exception_type == EXCEPTION_TYPE_REMOVED for ex in exceptions_today
+        )
+        is_added = any(
+            ex.exception_type == EXCEPTION_TYPE_ADDED for ex in exceptions_today
+        )
         if is_added or (in_range and on_service_day and not is_removed):
             services_for_today[service_id] = len(exceptions_today) > 0
 
@@ -66,7 +70,9 @@ def get_service_ids_for_date(feed_data: GtfsFeedData, today: date) -> Dict[str, 
     if not feed_data.calendar_services:
         for service_id, exceptions in feed_data.calendar_exceptions.items():
             exceptions_today = [ex for ex in exceptions if ex.date == today]
-            is_added = any(ex.exception_type == EXCEPTION_TYPE_ADDED for ex in exceptions_today)
+            is_added = any(
+                ex.exception_type == EXCEPTION_TYPE_ADDED for ex in exceptions_today
+            )
             if is_added:
                 services_for_today[service_id] = True
 

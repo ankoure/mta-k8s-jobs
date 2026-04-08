@@ -52,15 +52,15 @@ TMP_DIR = Path("/tmp/ridership")
 # ---------------------------------------------------------------------------
 
 LINE_ID_MAP: dict[str, str] = {
-    "Subway":      "line-subway",
-    "SIR":         "line-sir",
-    "MNR":         "line-mnr",
-    "LIRR":        "line-lirr",
-    "Bus":         "line-bus",
-    "AAR":         "line-aar",
-    "BT":          "line-bridgesandtunnels",
+    "Subway": "line-subway",
+    "SIR": "line-sir",
+    "MNR": "line-mnr",
+    "LIRR": "line-lirr",
+    "Bus": "line-bus",
+    "AAR": "line-aar",
+    "BT": "line-bridgesandtunnels",
     "CRZ Entries": "line-crzentries",
-    "CBD Entries":  "line-cbdentries",
+    "CBD Entries": "line-cbdentries",
 }
 
 
@@ -77,6 +77,7 @@ def normalize_line_id(raw_mode: str) -> str:
     cleaned = raw_mode.strip().replace(" ", "-")
     log.warning("Unmapped mode %r — falling back to line-%s", raw_mode, cleaned)
     return f"line-{cleaned}"
+
 
 # ---------------------------------------------------------------------------
 # Step 1: Fetch
@@ -173,11 +174,13 @@ def write_to_dynamodb(parquet_file: Path) -> None:
 
     with table.batch_writer() as batch:
         for date, raw_mode, ridership in rows:
-            batch.put_item(Item={
-                "lineId": normalize_line_id(str(raw_mode)),
-                "date": str(date),
-                "count": Decimal(str(ridership)),
-            })
+            batch.put_item(
+                Item={
+                    "lineId": normalize_line_id(str(raw_mode)),
+                    "date": str(date),
+                    "count": Decimal(str(ridership)),
+                }
+            )
 
     log.info("DynamoDB write complete")
 

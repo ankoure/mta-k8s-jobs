@@ -50,7 +50,9 @@ class GtfsRoute:
 @dataclass
 class GtfsFeedData:
     calendar_services: Dict[str, GtfsCalendarService] = field(default_factory=dict)
-    calendar_exceptions: Dict[str, List[GtfsCalendarException]] = field(default_factory=dict)
+    calendar_exceptions: Dict[str, List[GtfsCalendarException]] = field(
+        default_factory=dict
+    )
     trips_by_route_id: Dict[str, List[GtfsTrip]] = field(default_factory=dict)
     routes: Dict[str, GtfsRoute] = field(default_factory=dict)
 

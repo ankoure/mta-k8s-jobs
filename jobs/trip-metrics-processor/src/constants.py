@@ -31,53 +31,130 @@ ALL_LINES: list[str] = [
 # Distances sourced from nyc-transit-dash/common/constants/station_distances.json.
 ROUTE_METADATA = {
     "line-1234567s": {
-        "1":  {"stops": [["101N", "142N"], ["142S", "101S"]], "length": Decimal("14.475")},
-        "2":  {"stops": [["201N", "257N"], ["257S", "201S"]], "length": Decimal("24.845")},
-        "3":  {"stops": [["301N", "257N"], ["257S", "301S"]], "length": Decimal("17.285")},
-        "4":  {"stops": [["401N", "250N"], ["250S", "401S"]], "length": Decimal("19.625")},
-        "5":  {"stops": [["501N", "247N"], ["247S", "501S"]], "length": Decimal("23.116")},
-        "6":  {"stops": [["601N", "640N"], ["640S", "601S"]], "length": Decimal("13.993")},
-        "7":  {"stops": [["701N", "726N"], ["726S", "701S"]], "length": Decimal("9.820")},
-        "GS": {"stops": [["901N", "902N"], ["902S", "901S"]], "length": Decimal("0.430")},
+        "1": {
+            "stops": [["101N", "142N"], ["142S", "101S"]],
+            "length": Decimal("14.475"),
+        },
+        "2": {
+            "stops": [["201N", "257N"], ["257S", "201S"]],
+            "length": Decimal("24.845"),
+        },
+        "3": {
+            "stops": [["301N", "257N"], ["257S", "301S"]],
+            "length": Decimal("17.285"),
+        },
+        "4": {
+            "stops": [["401N", "250N"], ["250S", "401S"]],
+            "length": Decimal("19.625"),
+        },
+        "5": {
+            "stops": [["501N", "247N"], ["247S", "501S"]],
+            "length": Decimal("23.116"),
+        },
+        "6": {
+            "stops": [["601N", "640N"], ["640S", "601S"]],
+            "length": Decimal("13.993"),
+        },
+        "7": {
+            "stops": [["701N", "726N"], ["726S", "701S"]],
+            "length": Decimal("9.820"),
+        },
+        "GS": {
+            "stops": [["901N", "902N"], ["902S", "901S"]],
+            "length": Decimal("0.430"),
+        },
     },
     "line-ace": {
-        "A": {"stops": [["A02N", "A65N"], ["A65S", "A02S"]], "length": Decimal("22.517")},
-        "C": {"stops": [["A09N", "A55N"], ["A55S", "A09S"]], "length": Decimal("17.636")},
-        "E": {"stops": [["E01N", "F01N"], ["F01S", "E01S"]], "length": Decimal("15.453")},
+        "A": {
+            "stops": [["A02N", "A65N"], ["A65S", "A02S"]],
+            "length": Decimal("22.517"),
+        },
+        "C": {
+            "stops": [["A09N", "A55N"], ["A55S", "A09S"]],
+            "length": Decimal("17.636"),
+        },
+        "E": {
+            "stops": [["E01N", "F01N"], ["F01S", "E01S"]],
+            "length": Decimal("15.453"),
+        },
     },
     "line-bdfm": {
-        "B": {"stops": [["D03N", "D40N"], ["D40S", "D03S"]], "length": Decimal("22.901")},
-        "D": {"stops": [["D01N", "D43N"], ["D43S", "D01S"]], "length": Decimal("23.591")},
-        "F": {"stops": [["F01N", "D43N"], ["D43S", "F01S"]], "length": Decimal("24.991")},
-        "M": {"stops": [["M01N", "G08N"], ["G08S", "M01S"]], "length": Decimal("12.774")},
+        "B": {
+            "stops": [["D03N", "D40N"], ["D40S", "D03S"]],
+            "length": Decimal("22.901"),
+        },
+        "D": {
+            "stops": [["D01N", "D43N"], ["D43S", "D01S"]],
+            "length": Decimal("23.591"),
+        },
+        "F": {
+            "stops": [["F01N", "D43N"], ["D43S", "F01S"]],
+            "length": Decimal("24.991"),
+        },
+        "M": {
+            "stops": [["M01N", "G08N"], ["G08S", "M01S"]],
+            "length": Decimal("12.774"),
+        },
     },
     "line-nqrw": {
-        "N": {"stops": [["R01N", "D43N"], ["D43S", "R01S"]], "length": Decimal("18.847")},
-        "Q": {"stops": [["Q05N", "D43N"], ["D43S", "Q05S"]], "length": Decimal("16.294")},
-        "R": {"stops": [["R45N", "G08N"], ["G08S", "R45S"]], "length": Decimal("19.014")},
-        "W": {"stops": [["R01N", "N10N"], ["N10S", "R01S"]], "length": Decimal("18.452")},
+        "N": {
+            "stops": [["R01N", "D43N"], ["D43S", "R01S"]],
+            "length": Decimal("18.847"),
+        },
+        "Q": {
+            "stops": [["Q05N", "D43N"], ["D43S", "Q05S"]],
+            "length": Decimal("16.294"),
+        },
+        "R": {
+            "stops": [["R45N", "G08N"], ["G08S", "R45S"]],
+            "length": Decimal("19.014"),
+        },
+        "W": {
+            "stops": [["R01N", "N10N"], ["N10S", "R01S"]],
+            "length": Decimal("18.452"),
+        },
     },
     "line-g": {
-        "G": {"stops": [["F27N", "G22N"], ["G22S", "F27S"]], "length": Decimal("9.671")},
+        "G": {
+            "stops": [["F27N", "G22N"], ["G22S", "F27S"]],
+            "length": Decimal("9.671"),
+        },
     },
     "line-jz": {
-        "J": {"stops": [["G05N", "M23N"], ["M23S", "G05S"]], "length": Decimal("12.780")},
-        "Z": {"stops": [["G05N", "M23N"], ["M23S", "G05S"]], "length": Decimal("12.780")},
+        "J": {
+            "stops": [["G05N", "M23N"], ["M23S", "G05S"]],
+            "length": Decimal("12.780"),
+        },
+        "Z": {
+            "stops": [["G05N", "M23N"], ["M23S", "G05S"]],
+            "length": Decimal("12.780"),
+        },
     },
     "line-l": {
-        "L": {"stops": [["L01N", "L29N"], ["L29S", "L01S"]], "length": Decimal("9.746")},
+        "L": {
+            "stops": [["L01N", "L29N"], ["L29S", "L01S"]],
+            "length": Decimal("9.746"),
+        },
     },
     "line-sir": {
-        "SI": {"stops": [["S09N", "S31N"], ["S31S", "S09S"]], "length": Decimal("13.818")},
+        "SI": {
+            "stops": [["S09N", "S31N"], ["S31S", "S09S"]],
+            "length": Decimal("13.818"),
+        },
     },
     "line-mnr": {},
     "line-lirr": {},
 }
 
 
-def get_route_metadata(line: str, date: date, include_terminals: bool, route: str | None = None):
-    """Return combined stop pairs and total track length for a line group."""
+def get_route_metadata(
+    line: str, date: date, include_terminals: bool, route: str | None = None
+):
+    """Return stop pairs and track length for a specific route, or combined for the whole line group."""
     line_routes = ROUTE_METADATA.get(line, {})
+    if route and route in line_routes:
+        route_data = line_routes[route]
+        return {"stops": route_data["stops"], "length": route_data["length"]}
     all_stops = []
     total_length = Decimal("0")
     for route_data in line_routes.values():
@@ -119,10 +196,13 @@ ONE_WEEK_AGO_STRING = (TODAY - timedelta(weeks=1)).strftime(DATE_FORMAT_BACKEND)
 NINETY_DAYS_AGO_STRING = (TODAY - timedelta(days=90)).strftime(DATE_FORMAT_BACKEND)
 
 
-DD_URL_AGG_TT = "https://dashboard-api-beta.gtfscast.com/api/aggregate/traveltimes?{parameters}"
-DD_URL_SINGLE_TT = "https://dashboard-api-beta.gtfscast.com/api/traveltimes/{date}?{parameters}"
+DD_URL_AGG_TT = (
+    "https://dashboard-api-beta.gtfscast.com/api/aggregate/traveltimes?{parameters}"
+)
+DD_URL_SINGLE_TT = (
+    "https://dashboard-api-beta.gtfscast.com/api/traveltimes/{date}?{parameters}"
+)
 DD_URL_ALERTS = "https://dashboard-api-beta.gtfscast.com/api/alerts/{date}?{parameters}"
-
 
 
 def get_monthly_table_update_start():
@@ -144,12 +224,16 @@ def get_weekly_table_update_start():
 TABLE_MAP = {
     "weekly": {
         "table_name": "DeliveredTripMetricsWeekly",
-        "start_date": datetime.strptime("2016-01-11T08:00:00", DATE_FORMAT),  # Start on first Monday with data.
+        "start_date": datetime.strptime(
+            "2016-01-11T08:00:00", DATE_FORMAT
+        ),  # Start on first Monday with data.
         "update_start": get_weekly_table_update_start(),
     },
     "monthly": {
         "table_name": "DeliveredTripMetricsMonthly",
-        "start_date": datetime.strptime("2016-01-01T08:00:00", DATE_FORMAT),  # Start on 1st of first month with data.
+        "start_date": datetime.strptime(
+            "2016-01-01T08:00:00", DATE_FORMAT
+        ),  # Start on 1st of first month with data.
         "update_start": get_monthly_table_update_start(),
     },
 }

@@ -92,9 +92,7 @@ def compute_totals(feed_config, feed_data) -> list[RouteDateTotals]:
         )
         all_totals.extend(day_totals)
 
-    log.info(
-        f"[{feed_config.agency_id}] Computed {len(all_totals)} route-date entries"
-    )
+    log.info(f"[{feed_config.agency_id}] Computed {len(all_totals)} route-date entries")
     return all_totals
 
 
@@ -145,7 +143,9 @@ def main() -> None:
     failed_feeds = []
 
     for feed_config in feeds_to_process:
-        log.info(f"--- Processing {feed_config.display_name} ({feed_config.agency_id}) ---")
+        log.info(
+            f"--- Processing {feed_config.display_name} ({feed_config.agency_id}) ---"
+        )
         try:
             with TemporaryDirectory() as tmp_dir:
                 feed_data = fetch_and_parse(feed_config, Path(tmp_dir))

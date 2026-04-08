@@ -39,7 +39,9 @@ def download_gtfs_zip(url: str, dest_path: Path) -> Path:
     response = requests.get(url, timeout=120)
     response.raise_for_status()
     dest_path.write_bytes(response.content)
-    logger.info(f"Downloaded {len(response.content) / 1024 / 1024:.1f} MB to {dest_path}")
+    logger.info(
+        f"Downloaded {len(response.content) / 1024 / 1024:.1f} MB to {dest_path}"
+    )
     return dest_path
 
 
