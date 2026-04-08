@@ -16,6 +16,7 @@ spec:
           containers:
             - name: service-ridership-dashboard
               image: ghcr.io/ankoure/service-ridership-dashboard:latest
+              imagePullPolicy: Always
               resources:
                 requests:
                   memory: "512Mi"
