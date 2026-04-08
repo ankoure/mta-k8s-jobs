@@ -125,7 +125,7 @@ def populate_daily_table(
     delta = timedelta(days=180)
     speed_objects = []
     while current_date < end_date.date():
-        route_metadata = constants.get_route_metadata(line, current_date, False, route)
+        route_metadata = constants.get_route_metadata(line, route)
         print(f"Calculating daily values for 180 day chunk starting at: {current_date}")
         API_requests = get_agg_tt_api_requests(
             route_metadata["stops"], current_date, delta
@@ -163,10 +163,8 @@ def update_daily_table(date: date, routes: list[tuple[str, str | None]] | None =
         if car_ages[line] is not None:
             print(f"Avg car age for {line} on {date}: {car_ages[line]} years")
 
-    for route in routes:
-        line = route[0]
-        route = route[1]
-        route_metadata = constants.get_route_metadata(line, date, False, route)
+    for line, route in routes:
+        route_metadata = constants.get_route_metadata(line, route)
         delta = timedelta(days=1)
         date_string = date.strftime(constants.DATE_FORMAT_BACKEND)
         print(

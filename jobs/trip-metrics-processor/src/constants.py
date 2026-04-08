@@ -1,17 +1,31 @@
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from decimal import Decimal
 
 ALL_ROUTES: list[tuple[str, str | None]] = [
-    ("line-1234567s", None),
-    ("line-ace", None),
-    ("line-bdfm", None),
-    ("line-nqrw", None),
-    ("line-g", None),
-    ("line-jz", None),
-    ("line-l", None),
-    ("line-sir", None),
-    ("line-mnr", None),
-    ("line-lirr", None),
+    ("line-1234567s", "1"),
+    ("line-1234567s", "2"),
+    ("line-1234567s", "3"),
+    ("line-1234567s", "4"),
+    ("line-1234567s", "5"),
+    ("line-1234567s", "6"),
+    ("line-1234567s", "7"),
+    ("line-1234567s", "GS"),
+    ("line-ace", "A"),
+    ("line-ace", "C"),
+    ("line-ace", "E"),
+    ("line-bdfm", "B"),
+    ("line-bdfm", "D"),
+    ("line-bdfm", "F"),
+    ("line-bdfm", "M"),
+    ("line-nqrw", "N"),
+    ("line-nqrw", "Q"),
+    ("line-nqrw", "R"),
+    ("line-nqrw", "W"),
+    ("line-g", "G"),
+    ("line-jz", "J"),
+    ("line-jz", "Z"),
+    ("line-l", "L"),
+    ("line-sir", "SI"),
 ]
 ALL_LINES: list[str] = [
     "1234567s",
@@ -147,9 +161,7 @@ ROUTE_METADATA = {
 }
 
 
-def get_route_metadata(
-    line: str, date: date, include_terminals: bool, route: str | None = None
-):
+def get_route_metadata(line: str, route: str | None = None):
     """Return stop pairs and track length for a specific route, or combined for the whole line group."""
     line_routes = ROUTE_METADATA.get(line, {})
     if route and route in line_routes:
