@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: trip-metrics-processor
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/ankoure/mta-k8s-jobs.git
+    targetRevision: main
+    path: jobs/trip-metrics-processor
+    directory:
+      include: "cronjob.yaml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: data-jobs
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
