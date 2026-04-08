@@ -100,7 +100,7 @@ def _load_ridership_by_line(
         raw_items = query_ridership(line_id, start_date, end_date)
         entries: dict[date, RidershipEntry] = {}
         for item in raw_items:
-            d = date.fromisoformat(item["date"])
+            d = date.fromisoformat(item["date"].split(" ")[0])
             entries[d] = RidershipEntry(date=d, ridership=float(item["count"]))
         result[line_id] = entries
     return result

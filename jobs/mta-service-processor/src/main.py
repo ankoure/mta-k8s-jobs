@@ -57,23 +57,31 @@ def fetch_and_parse(feed_config: AgencyFeedConfig, tmp_dir: Path):
 
 def compute_totals(feed_config, feed_data) -> list[RouteDateTotals]:
     """Compute RouteDateTotals for all valid dates in the feed."""
-    # Determine the date range from calendar services
+    # Determine the date range from calendar services AND calendar_dates exceptions.
+    # Bus feeds often publish future schedules (calendar starts days ahead)
+    # but have calendar_dates exceptions covering today.
+    all_dates: list[date] = []
     if feed_data.calendar_services:
-        all_start_dates = [s.start_date for s in feed_data.calendar_services.values()]
-        all_end_dates = [s.end_date for s in feed_data.calendar_services.values()]
-        feed_start = min(all_start_dates)
-        feed_end = min(max(all_end_dates), date.today())
-    elif feed_data.calendar_exceptions:
-        # Calendar-dates-only feed: use the range of exception dates
-        all_dates = [
-            ex.date
-            for exceptions in feed_data.calendar_exceptions.values()
-            for ex in exceptions
-        ]
-        feed_start = min(all_dates)
-        feed_end = min(max(all_dates), date.today())
-    else:
+        for s in feed_data.calendar_services.values():
+            all_dates.append(s.start_date)
+            all_dates.append(s.end_date)
+    if feed_data.calendar_exceptions:
+        for exceptions in feed_data.calendar_exceptions.values():
+            for ex in exceptions:
+                all_dates.append(ex.date)
+
+    if not all_dates:
         log.warning(f"[{feed_config.agency_id}] No calendar data found, skipping")
+        return []
+
+    feed_start = min(all_dates)
+    feed_end = min(max(all_dates), date.today())
+
+    if feed_start > feed_end:
+        log.warning(
+            f"[{feed_config.agency_id}] No processable dates "
+            f"(earliest={feed_start}, today={date.today()}), skipping"
+        )
         return []
 
     log.info(
