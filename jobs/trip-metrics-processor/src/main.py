@@ -163,6 +163,7 @@ def update_daily_table(date: date, routes: list[tuple[str, str | None]] | None =
         if car_ages[line] is not None:
             print(f"Avg car age for {line} on {date}: {car_ages[line]} years")
 
+    failed_routes = []
     for line, route in routes:
         route_metadata = constants.get_route_metadata(line, route)
         delta = timedelta(days=1)
@@ -170,8 +171,13 @@ def update_daily_table(date: date, routes: list[tuple[str, str | None]] | None =
         print(
             f"Calculating update on [{line}/{route if route else '(no-route)'}] for date: {date_string}"
         )
-        API_requests = get_agg_tt_api_requests(route_metadata["stops"], date, delta)
-        speed_object = send_requests(API_requests)
+        try:
+            API_requests = get_agg_tt_api_requests(route_metadata["stops"], date, delta)
+            speed_object = send_requests(API_requests)
+        except requests.exceptions.HTTPError as e:
+            print(f"Failed to fetch data for {line}/{route}: {e}")
+            failed_routes.append((line, route))
+            continue
         formatted_speed_object = format_tt_objects(
             speed_object,
             route_metadata,
@@ -192,7 +198,10 @@ def update_daily_table(date: date, routes: list[tuple[str, str | None]] | None =
         speed_objects.extend(formatted_speed_object)
     print(f"Writing values: {speed_objects}")
     dynamo.dynamo_batch_write(speed_objects, "DeliveredTripMetrics")
-    print("Complete.")
+    if failed_routes:
+        print(f"Completed with errors. Failed routes: {failed_routes}")
+    else:
+        print("Complete.")
 
 
 if __name__ == "__main__":
