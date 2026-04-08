@@ -84,6 +84,8 @@ class MobilityApiClient:
                 time.sleep(delay)
                 continue
 
+            if resp.status_code >= 400:
+                logger.error(f"API error {resp.status_code}: {resp.text[:500]}")
             resp.raise_for_status()
             return resp.json()
 
@@ -103,8 +105,13 @@ class MobilityApiClient:
         if latest:
             params["latest"] = "true"
         if downloaded_after:
+            # API expects full ISO datetime, not just a date
+            if len(downloaded_after) == 10:  # YYYY-MM-DD
+                downloaded_after = f"{downloaded_after}T00:00:00Z"
             params["downloaded_after"] = downloaded_after
         if downloaded_before:
+            if len(downloaded_before) == 10:
+                downloaded_before = f"{downloaded_before}T23:59:59Z"
             params["downloaded_before"] = downloaded_before
 
         data = self._get(f"/gtfs_feeds/{feed_id}/datasets", params=params)
