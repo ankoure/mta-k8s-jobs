@@ -3,7 +3,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from datetime import date
 
-from config import AGENCY_TO_LINE, LINE_METADATA, SIR_ROUTE_IDS
+from config import AGENCY_TO_LINE, LINE_METADATA, SUBWAY_ROUTE_TO_LINE
 from queries import scan_scheduled_service
 
 log = logging.getLogger(__name__)
@@ -26,7 +26,8 @@ def get_service_levels_by_line(
     """Load scheduled service data and aggregate from route level to line level.
 
     Sums hourly trip counts across all routes from all agencies that map to
-    the same line, for each date.
+    the same line, for each date. Subway routes are assigned to both their
+    individual line (line-G, line-L, etc.) and the aggregate line-subway.
     """
     raw_items = scan_scheduled_service(start_date, end_date)
 
@@ -39,12 +40,20 @@ def get_service_levels_by_line(
         line_id = AGENCY_TO_LINE.get(agency_id)
         if line_id is None:
             continue
-        # SIR routes are in the nyct_subway feed; split them into line-sir
+
         route_id = item.get("routeId", "")
-        if agency_id == "nyct_subway" and route_id in SIR_ROUTE_IDS:
-            line_id = "line-sir"
         item_date = date.fromisoformat(item["date"])
-        buckets[line_id][item_date].append(item)
+
+        if agency_id == "nyct_subway":
+            individual_line = SUBWAY_ROUTE_TO_LINE.get(route_id)
+            if individual_line:
+                # Individual line (line-G, line-sir, etc.)
+                buckets[individual_line][item_date].append(item)
+            if individual_line != "line-sir":
+                # Aggregate subway (everything except SIR)
+                buckets["line-subway"][item_date].append(item)
+        else:
+            buckets[line_id][item_date].append(item)
 
     # Aggregate each bucket into a ServiceLevelsEntry
     result: ServiceLevelsByLineId = {}

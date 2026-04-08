@@ -26,17 +26,47 @@ AGENCY_TO_LINE: dict[str, str] = {
 
 ALL_AGENCY_IDS = list(AGENCY_TO_LINE.keys())
 
-# SIR is included in the nyct_subway GTFS feed with routeId "SI".
-# These route IDs are split out from nyct_subway into line-sir.
-SIR_ROUTE_IDS = {"SI"}
+# Individual subway route -> line mapping.
+# SIR (routeId "SI") is in the nyct_subway feed but gets its own line.
+SUBWAY_ROUTE_TO_LINE: dict[str, str] = {
+    "1": "line-1",
+    "2": "line-2",
+    "3": "line-3",
+    "4": "line-4",
+    "5": "line-5",
+    "6": "line-6",
+    "7": "line-7",
+    "A": "line-A",
+    "C": "line-C",
+    "E": "line-E",
+    "B": "line-B",
+    "D": "line-D",
+    "F": "line-F",
+    "M": "line-M",
+    "G": "line-G",
+    "J": "line-J",
+    "Z": "line-Z",
+    "L": "line-L",
+    "N": "line-N",
+    "Q": "line-Q",
+    "R": "line-R",
+    "W": "line-W",
+    "S": "line-S",
+    "SI": "line-sir",
+}
 
-DASHBOARD_LINE_IDS = ["line-subway", "line-bus", "line-lirr", "line-mnr", "line-sir"]
+# Aggregate lines — used for summary/mode stats (have both service + ridership)
+SUMMARY_LINE_IDS = ["line-subway", "line-bus", "line-lirr", "line-mnr", "line-sir"]
+
+# Individual subway lines — service data only, no ridership
+SUBWAY_LINE_IDS = [lid for lid in SUBWAY_ROUTE_TO_LINE.values() if lid != "line-sir"]
 
 # ---------------------------------------------------------------------------
 # Line metadata
 # ---------------------------------------------------------------------------
 
 LINE_METADATA: dict[str, dict] = {
+    # Aggregate lines
     "line-subway": {
         "shortName": "Subway",
         "longName": "New York City Subway",
@@ -62,6 +92,118 @@ LINE_METADATA: dict[str, dict] = {
         "longName": "Staten Island Railway",
         "lineKind": "rapid-transit",
     },
+    # Individual subway lines
+    "line-1": {
+        "shortName": "1",
+        "longName": "Broadway-7th Avenue Local",
+        "lineKind": "rapid-transit",
+    },
+    "line-2": {
+        "shortName": "2",
+        "longName": "7th Avenue Express",
+        "lineKind": "rapid-transit",
+    },
+    "line-3": {
+        "shortName": "3",
+        "longName": "7th Avenue Express",
+        "lineKind": "rapid-transit",
+    },
+    "line-4": {
+        "shortName": "4",
+        "longName": "Lexington Avenue Express",
+        "lineKind": "rapid-transit",
+    },
+    "line-5": {
+        "shortName": "5",
+        "longName": "Lexington Avenue Express",
+        "lineKind": "rapid-transit",
+    },
+    "line-6": {
+        "shortName": "6",
+        "longName": "Lexington Avenue Local",
+        "lineKind": "rapid-transit",
+    },
+    "line-7": {
+        "shortName": "7",
+        "longName": "Flushing Local/Express",
+        "lineKind": "rapid-transit",
+    },
+    "line-A": {
+        "shortName": "A",
+        "longName": "8th Avenue Express",
+        "lineKind": "rapid-transit",
+    },
+    "line-C": {
+        "shortName": "C",
+        "longName": "8th Avenue Local",
+        "lineKind": "rapid-transit",
+    },
+    "line-E": {
+        "shortName": "E",
+        "longName": "8th Avenue Local",
+        "lineKind": "rapid-transit",
+    },
+    "line-B": {
+        "shortName": "B",
+        "longName": "6th Avenue Express",
+        "lineKind": "rapid-transit",
+    },
+    "line-D": {
+        "shortName": "D",
+        "longName": "6th Avenue Express",
+        "lineKind": "rapid-transit",
+    },
+    "line-F": {
+        "shortName": "F",
+        "longName": "6th Avenue Local",
+        "lineKind": "rapid-transit",
+    },
+    "line-M": {
+        "shortName": "M",
+        "longName": "6th Avenue Local",
+        "lineKind": "rapid-transit",
+    },
+    "line-G": {
+        "shortName": "G",
+        "longName": "Brooklyn-Queens Crosstown",
+        "lineKind": "rapid-transit",
+    },
+    "line-J": {
+        "shortName": "J",
+        "longName": "Nassau Street Local",
+        "lineKind": "rapid-transit",
+    },
+    "line-Z": {
+        "shortName": "Z",
+        "longName": "Nassau Street Express",
+        "lineKind": "rapid-transit",
+    },
+    "line-L": {
+        "shortName": "L",
+        "longName": "14th Street-Canarsie Local",
+        "lineKind": "rapid-transit",
+    },
+    "line-N": {
+        "shortName": "N",
+        "longName": "Broadway Express",
+        "lineKind": "rapid-transit",
+    },
+    "line-Q": {
+        "shortName": "Q",
+        "longName": "2nd Avenue/Broadway Express",
+        "lineKind": "rapid-transit",
+    },
+    "line-R": {
+        "shortName": "R",
+        "longName": "Broadway Local",
+        "lineKind": "rapid-transit",
+    },
+    "line-W": {
+        "shortName": "W",
+        "longName": "Broadway Local",
+        "lineKind": "rapid-transit",
+    },
+    "line-S": {"shortName": "S", "longName": "Shuttle", "lineKind": "rapid-transit"},
 }
 
 LINE_KIND_TO_MODE: dict[str, str] = {

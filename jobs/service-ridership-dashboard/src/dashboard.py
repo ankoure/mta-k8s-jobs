@@ -5,10 +5,11 @@ from datetime import date, timedelta
 from typing import Literal, Optional, TypedDict
 
 from config import (
-    DASHBOARD_LINE_IDS,
     LINE_KIND_TO_MODE,
     LINE_METADATA,
     PRE_COVID_DATE,
+    SUBWAY_LINE_IDS,
+    SUMMARY_LINE_IDS,
 )
 from queries import query_ridership
 from service_levels import (
@@ -219,10 +220,19 @@ def _create_line_data(
     start_date: date,
     end_date: date,
     service_levels: ServiceLevelsByDate,
-    ridership: dict[date, RidershipEntry],
+    ridership: Optional[dict[date, RidershipEntry]] = None,
 ) -> LineData:
     meta = LINE_METADATA[line_id]
     latest_date = max(service_levels.keys())
+
+    ridership_history: WeeklyMedianTimeSeries = {}
+    if ridership:
+        ridership_history = get_weekly_median_time_series(
+            entries=ridership,
+            entry_value_getter=lambda e: e.ridership,
+            start_date=start_date,
+            max_end_date=end_date,
+        )
 
     return {
         "id": line_id,
@@ -230,12 +240,7 @@ def _create_line_data(
         "longName": meta["longName"],
         "lineKind": meta["lineKind"],
         "startDate": start_date.isoformat(),
-        "ridershipHistory": get_weekly_median_time_series(
-            entries=ridership,
-            entry_value_getter=lambda e: e.ridership,
-            start_date=start_date,
-            max_end_date=end_date,
-        ),
+        "ridershipHistory": ridership_history,
         "serviceHistory": get_weekly_median_time_series(
             entries=service_levels,
             entry_value_getter=lambda e: round(sum(e.service_levels)),
@@ -321,20 +326,32 @@ def build_dashboard_json(start_date: date, end_date: date) -> DashJSON:
     log.info("Loading service levels...")
     service_by_line = get_service_levels_by_line(start_date, end_date)
 
-    # Only include lines that have service data
-    active_line_ids = [
+    # Aggregate lines (have both service + ridership) — used for summaries
+    active_summary_ids = [
         lid
-        for lid in DASHBOARD_LINE_IDS
+        for lid in SUMMARY_LINE_IDS
         if lid in service_by_line and service_by_line[lid]
     ]
-    log.info("Active lines with service data: %s", active_line_ids)
+    log.info("Active aggregate lines: %s", active_summary_ids)
 
+    # Individual subway lines (service only)
+    active_subway_ids = [
+        lid
+        for lid in SUBWAY_LINE_IDS
+        if lid in service_by_line and service_by_line[lid]
+    ]
+    log.info("Active subway lines: %s", active_subway_ids)
+
+    # Load ridership only for aggregate lines
     log.info("Loading ridership...")
-    ridership_by_line = _load_ridership_by_line(start_date, end_date, active_line_ids)
+    ridership_by_line = _load_ridership_by_line(
+        start_date, end_date, active_summary_ids
+    )
 
-    # Build per-line data (only for lines with both service and ridership)
     line_data_by_id: dict[str, LineData] = {}
-    for line_id in active_line_ids:
+
+    # Build aggregate lines (service + ridership)
+    for line_id in active_summary_ids:
         service = service_by_line.get(line_id, {})
         ridership = ridership_by_line.get(line_id, {})
         if not service or not ridership:
@@ -345,9 +362,22 @@ def build_dashboard_json(start_date: date, end_date: date) -> DashJSON:
         )
         log.info("Built line data for %s", line_id)
 
-    all_lines = list(line_data_by_id.values())
-    summary = _get_summary_data(all_lines, start_date, end_date)
-    mode_data = _get_summary_by_mode(all_lines, start_date, end_date)
+    # Build individual subway lines (service only, no ridership)
+    for line_id in active_subway_ids:
+        service = service_by_line.get(line_id, {})
+        if not service:
+            continue
+        line_data_by_id[line_id] = _create_line_data(
+            line_id, start_date, end_date, service
+        )
+        log.info("Built line data for %s (service only)", line_id)
+
+    # Summaries use only aggregate lines to avoid double-counting
+    summary_lines = [
+        line_data_by_id[lid] for lid in active_summary_ids if lid in line_data_by_id
+    ]
+    summary = _get_summary_data(summary_lines, start_date, end_date)
+    mode_data = _get_summary_by_mode(summary_lines, start_date, end_date)
 
     return {
         "lineData": line_data_by_id,
